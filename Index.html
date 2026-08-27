@@ -1,0 +1,686 @@
+html_content = '''<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบบริหารจัดการงานและปฏิทินคณะทำงาน</title>
+  
+  <!-- CSS Libraries -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary-color: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body { 
+      font-family: 'Sarabun', sans-serif; 
+      background-color: var(--bg-color); 
+      color: var(--text-main);
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: 70px; /* Space for bottom nav on mobile */
+    }
+
+    /* Top Navbar for Mobile */
+    .mobile-navbar {
+      background: #0f172a;
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .mobile-navbar .brand-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Offcanvas Menu & Sidebar */
+    .sidebar-heading {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      font-weight: 700;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      padding-left: 0.75rem;
+    }
+
+    .nav-custom .nav-link { 
+      color: #334155; 
+      border-radius: 10px; 
+      margin-bottom: 4px; 
+      padding: 12px 16px; 
+      font-weight: 500; 
+      display: flex;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-custom .nav-link i {
+      width: 24px;
+      font-size: 1.1rem;
+      margin-right: 10px;
+      color: #64748b;
+    }
+
+    .nav-custom .nav-link.active { 
+      background: var(--primary-color); 
+      color: #fff; 
+    }
+
+    .nav-custom .nav-link.active i {
+      color: #fff;
+    }
+
+    /* Cards & Container */
+    .card-custom { 
+      background: var(--card-bg); 
+      border-radius: 16px; 
+      border: 1px solid var(--border-color); 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    /* Mobile Table Optimizations */
+    .table-responsive-custom {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .table-mobile {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+
+    .table-mobile th {
+      background-color: #f1f5f9;
+      color: #475569;
+      font-weight: 600;
+      border-top: none;
+      white-space: nowrap;
+      padding: 12px 14px;
+    }
+
+    .table-mobile td {
+      padding: 12px 14px;
+      vertical-align: middle;
+      border-color: #f1f5f9;
+    }
+
+    /* Badge Customization */
+    .badge-status { 
+      font-weight: 600; 
+      padding: 6px 10px; 
+      border-radius: 30px; 
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Bottom Quick Action Bar for Mobile */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1020;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.72rem;
+      font-weight: 500;
+      width: 25%;
+      height: 100%;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .bottom-nav-item i {
+      font-size: 1.25rem;
+      margin-bottom: 2px;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--primary-color);
+    }
+
+    .fab-add {
+      position: fixed;
+      bottom: 75px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      border: none;
+      z-index: 1010;
+      transition: transform 0.2s;
+    }
+
+    .fab-add:active {
+      transform: scale(0.92);
+    }
+
+    /* FullCalendar Responsive Tweaks */
+    .fc {
+      font-family: 'Sarabun', sans-serif !important;
+    }
+    .fc-toolbar-title {
+      font-size: 1.1rem !important;
+      font-weight: 700;
+    }
+    .fc-button {
+      padding: 6px 10px !important;
+      font-size: 0.85rem !important;
+      border-radius: 8px !important;
+    }
+    .fc-event {
+      border-radius: 6px !important;
+      padding: 3px 6px !important;
+      font-size: 0.8rem !important;
+    }
+
+    /* Responsive Utilities */
+    @media (min-width: 992px) {
+      body {
+        padding-bottom: 0;
+      }
+      .mobile-navbar {
+        display: none !important;
+      }
+      .bottom-nav {
+        display: none !important;
+      }
+      .fab-add {
+        display: none !important;
+      }
+      .desktop-sidebar {
+        display: block !important;
+      }
+    }
+
+    @media (max-width: 991.98px) {
+      .desktop-sidebar {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Mobile Header Bar -->
+<header class="mobile-navbar p-3 d-flex justify-content-between align-items-center">
+  <div class="d-flex align-items-center">
+    <button class="btn text-white p-0 me-3 fs-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+      <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+    <div class="brand-title">
+      <i class="fa-solid fa-chart-line text-primary me-2"></i>WorkDashboard
+    </div>
+  </div>
+  <button class="btn btn-sm btn-outline-light rounded-circle p-2" onclick="fetchData()" title="รีเฟรช">
+    <i class="fa-solid fa-rotate"></i>
+  </button>
+</header>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Desktop Sidebar (Visible only on large screens) -->
+    <div class="col-lg-2 desktop-sidebar p-3 style-sidebar" style="min-height: 100vh; background: #0f172a; color: #fff;">
+      <div class="d-flex align-items-center mb-4 px-2">
+        <i class="fa-solid fa-chart-line text-primary fs-3 me-2"></i>
+        <h5 class="fw-bold mb-0 text-white">WorkDashboard</h5>
+      </div>
+      <div class="nav flex-column nav-pills nav-custom">
+        <button class="nav-link text-white active" onclick="switchSheet('สถานะงาน')"><i class="fa-solid fa-list-check"></i>สถานะงาน</button>
+        <button class="nav-link text-white" onclick="switchSheet('ให้คำปรึกษาจังหวัด')"><i class="fa-solid fa-comments"></i>ให้คำปรึกษาจังหวัด</button>
+        <button class="nav-link text-white" onclick="switchSheet('คณะทำงาน')"><i class="fa-solid fa-users"></i>คณะทำงาน / ปฏิทิน</button>
+        <button class="nav-link text-white" onclick="switchSheet('ร่วมกิจกรรม')"><i class="fa-solid fa-trophy"></i>ร่วมกิจกรรม</button>
+        <button class="nav-link text-white" onclick="switchSheet('ทะเบียนคุมการขอข้อมูล')"><i class="fa-solid fa-folder-open"></i>ทะเบียนคุมการขอข้อมูล</button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="col-12 col-lg-10 p-3 p-md-4">
+      
+      <!-- Top Header Title & Action (Desktop view) -->
+      <div class="d-none d-md-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 id="sheetTitle" class="fw-bold text-dark mb-1">สถานะงาน</h3>
+          <p class="text-muted small mb-0">ระบบแสดงผล ติดตามงาน และจัดการข้อมูลผ่าน Google Sheets</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary rounded-pill px-3" onclick="fetchData()"><i class="fa-solid fa-rotate me-1"></i> รีเฟรช</button>
+          <button class="btn btn-primary rounded-pill px-3" onclick="openAddModal()"><i class="fa-solid fa-plus me-1"></i> เพิ่มข้อมูลใหม่</button>
+        </div>
+      </div>
+
+      <!-- Mobile Active Title Banner -->
+      <div class="d-md-none mb-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <h4 id="mobileSheetTitle" class="fw-bold text-dark mb-0">สถานะงาน</h4>
+          <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill" id="totalRowsBadge">0 รายการ</span>
+        </div>
+      </div>
+
+      <!-- Section: Calendar View (สำหรับคณะทำงาน) -->
+      <div id="calendarSection" class="card-custom p-3 p-md-4 mb-3" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold text-primary mb-0"><i class="fa-regular fa-calendar-days me-2"></i>ปฏิทินนัดประชุมคณะทำงาน</h6>
+          <span class="badge bg-primary bg-opacity-10 text-primary" id="eventCountBadge">0 นัดหมาย</span>
+        </div>
+        <div id="calendar"></div>
+      </div>
+
+      <!-- Section: Table View -->
+      <div id="tableSection" class="card-custom">
+        <div class="table-responsive-custom">
+          <table class="table table-mobile align-middle">
+            <thead id="tableHeader"></thead>
+            <tbody id="tableBody">
+              <tr><td class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังโหลดข้อมูล...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- Mobile Offcanvas Menu (Drawer) -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" style="width: 280px;">
+  <div class="offcanvas-header border-bottom bg-dark text-white">
+    <h5 class="offcanvas-title fw-bold fs-6"><i class="fa-solid fa-chart-line text-primary me-2"></i>เมนูหลัก</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body p-3">
+    <div class="sidebar-heading">รายการฐานข้อมูล</div>
+    <div class="nav flex-column nav-custom" id="mobileNavLinks">
+      <button class="nav-link active" data-bs-dismiss="offcanvas" onclick="switchSheet('สถานะงาน')"><i class="fa-solid fa-list-check"></i>สถานะงาน</button>
+      <button class="nav-link" data-bs-dismiss="offcanvas" onclick="switchSheet('ให้คำปรึกษาจังหวัด')"><i class="fa-solid fa-comments"></i>ให้คำปรึกษาจังหวัด</button>
+      <button class="nav-link" data-bs-dismiss="offcanvas" onclick="switchSheet('คณะทำงาน')"><i class="fa-solid fa-users"></i>คณะทำงาน / ปฏิทิน</button>
+      <button class="nav-link" data-bs-dismiss="offcanvas" onclick="switchSheet('ร่วมกิจกรรม')"><i class="fa-solid fa-trophy"></i>ร่วมกิจกรรม</button>
+      <button class="nav-link" data-bs-dismiss="offcanvas" onclick="switchSheet('ทะเบียนคุมการขอข้อมูล')"><i class="fa-solid fa-folder-open"></i>ทะเบียนคุมการขอข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Action Button for Adding Data on Mobile -->
+<button class="fab-add" onclick="openAddModal()" title="เพิ่มข้อมูลใหม่">
+  <i class="fa-solid fa-plus"></i>
+</button>
+
+<!-- Bottom Nav Bar for Mobile Quick Access -->
+<nav class="bottom-nav">
+  <button class="bottom-nav-item active" id="btnNavWork" onclick="switchSheet('สถานะงาน')">
+    <i class="fa-solid fa-list-check"></i>
+    <span>สถานะงาน</span>
+  </button>
+  <button class="bottom-nav-item" id="btnNavConsult" onclick="switchSheet('ให้คำปรึกษาจังหวัด')">
+    <i class="fa-solid fa-comments"></i>
+    <span>ให้คำปรึกษา</span>
+  </button>
+  <button class="bottom-nav-item" id="btnNavTeam" onclick="switchSheet('คณะทำงาน')">
+    <i class="fa-solid fa-calendar-days"></i>
+    <span>ปฏิทินงาน</span>
+  </button>
+  <button class="bottom-nav-item" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+    <i class="fa-solid fa-ellipsis"></i>
+    <span>เมนูเพิ่มเติม</span>
+  </button>
+</nav>
+
+<!-- Modal สำหรับเพิ่ม/แก้ไขข้อมูล (ปรับสไตล์ให้เต็มหน้าจอมือถือ) -->
+<div class="modal fade" id="dataModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title fw-bold fs-6" id="modalTitle">จัดการข้อมูล</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-3">
+        <form id="dataForm"></form>
+      </div>
+      <div class="modal-footer border-top">
+        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnSave" onclick="saveData()">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbydbwzapBNgfm6hiB2vk_zk75lI6cJAq3iuUp381uj70NRd9J611y4q-SimcRKnqxlxtw/exec";
+  let currentSheet = "สถานะงาน";
+  let calendar = null;
+  let modalInstance = null;
+  let currentFetchedData = [];
+  let editingRowIndex = null;
+
+  const sheetConfigs = {
+    "สถานะงาน": ["ลำดับที่", "เรื่อง", "วันรับ", "วันเสร็จ", "ผู้มอบหมาย/ส่งข้อมูล", "สถานะ", "หมายเหตุ"],
+    "ให้คำปรึกษาจังหวัด": ["ลำดับที่", "วันที่", "จังหวัด", "ปัญหา", "สถานะ", "หมายเหตุ"],
+    "คณะทำงาน": ["ลำดับที่", "รายการ", "ครั้งที่ 1", "ครั้งที่ 2", "ครั้งที่ 3", "ครั้งที่ 4", "ครั้งที่ 5", "ครั้งที่ 6", "ครั้งที่ 7"],
+    "ร่วมกิจกรรม": ["ลำดับที่", "รายการ", "วันที่", "ผล"],
+    "ทะเบียนคุมการขอข้อมูล": ["ลำดับที่", "จังหวัด", "วันที่", "จำนวน", "ที่วาง", "สถานะ", "สถานะการส่ง"]
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    modalInstance = new bootstrap.Modal(document.getElementById('dataModal'));
+    renderTableHeader();
+    initCalendar();
+    fetchData();
+  });
+
+  function switchSheet(name) {
+    currentSheet = name;
+    
+    // Update Title Texts
+    const titleEl = document.getElementById("sheetTitle");
+    const mobileTitleEl = document.getElementById("mobileSheetTitle");
+    if (titleEl) titleEl.innerText = name;
+    if (mobileTitleEl) mobileTitleEl.innerText = name;
+
+    // Update active state in sidebars
+    document.querySelectorAll('.nav-custom .nav-link').forEach(btn => {
+      btn.classList.toggle('active', btn.innerText.includes(name));
+    });
+
+    // Update Bottom Nav state
+    document.querySelectorAll('.bottom-nav-item').forEach(btn => btn.classList.remove('active'));
+    if (name === 'สถานะงาน') document.getElementById('btnNavWork')?.classList.add('active');
+    else if (name === 'ให้คำปรึกษาจังหวัด') document.getElementById('btnNavConsult')?.classList.add('active');
+    else if (name === 'คณะทำงาน') document.getElementById('btnNavTeam')?.classList.add('active');
+
+    const isCalendar = (name === "คณะทำงาน");
+    document.getElementById("calendarSection").style.display = isCalendar ? "block" : "none";
+    
+    renderTableHeader();
+    fetchData();
+  }
+
+  function renderTableHeader() {
+    const headers = [...sheetConfigs[currentSheet], "จัดการ"];
+    document.getElementById("tableHeader").innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+  }
+
+  function getValueByHeader(rowObj, headerName) {
+    if (rowObj[headerName] !== undefined && rowObj[headerName] !== "") return rowObj[headerName];
+    const keys = Object.keys(rowObj);
+    const matchedKey = keys.find(k => k.trim().replace(/\s+/g, '') === headerName.trim().replace(/\s+/g, ''));
+    if (matchedKey && rowObj[matchedKey] !== undefined) return rowObj[matchedKey];
+    return "";
+  }
+
+  function fetchData() {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = `<tr><td colspan="12" class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังดึงข้อมูลล่าสุด...</td></tr>`;
+
+    fetch(`${WEB_APP_URL}?sheet=${encodeURIComponent(currentSheet)}`)
+      .then(res => res.json())
+      .then(data => {
+        // Handle error response from Apps Script
+        if (data.status === "error") {
+          tbody.innerHTML = `<tr><td colspan="12" class="text-center py-4 text-danger"><i class="fa-solid fa-circle-exclamation me-2"></i>ไม่พบแผ่นงานชื่อ "${currentSheet}" ใน Google Sheets</td></tr>`;
+          return;
+        }
+
+        currentFetchedData = data || [];
+        document.getElementById("totalRowsBadge").innerText = `${currentFetchedData.length} รายการ`;
+
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="12" class="text-center py-4 text-muted">ไม่พบข้อมูลในระบบ</td></tr>`;
+          return;
+        }
+
+        const headers = sheetConfigs[currentSheet];
+        tbody.innerHTML = data.map((row, idx) => {
+          const cellsHtml = headers.map(h => {
+            let val = getValueByHeader(row, h);
+            if (h === "ลำดับที่" && (!val || val === "")) val = idx + 1;
+            return `<td>${formatCell(val, h)}</td>`;
+          }).join('');
+
+          const actionHtml = `<td>
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="openEditModal(${idx})">
+              <i class="fa-solid fa-pen-to-square me-1"></i>แก้ไข
+            </button>
+          </td>`;
+
+          return `<tr>${cellsHtml}${actionHtml}</tr>`;
+        }).join('');
+
+        if (currentSheet === "คณะทำงาน") {
+          updateCalendarEvents(data);
+        }
+      })
+      .catch(err => {
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-4 text-danger">เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบเน็ตหรือ URL</td></tr>`;
+        console.error(err);
+      });
+  }
+
+  function formatCell(val, headerName) {
+    if (val === undefined || val === null || val === "") return "-";
+    if (typeof val === "string" && val.includes("T") && val.includes("Z")) {
+      val = formatISODate(val);
+    }
+    if (val === "ดำเนินการแล้วเสร็จ" || val === "แก้ปัญหาเรียบร้อย") {
+      return `<span class="badge bg-success bg-opacity-10 text-success badge-status"><i class="fa-solid fa-circle-check me-1"></i>${val}</span>`;
+    }
+    if (val === "ส่งหนังสือให้ที่ดินแล้ว" || val === "ไม่มีหนังสือ" || val === "กำลังดำเนินการ") {
+      return `<span class="badge bg-warning bg-opacity-10 text-warning badge-status"><i class="fa-solid fa-clock me-1"></i>${val}</span>`;
+    }
+    return val;
+  }
+
+  function formatISODate(isoStr) {
+    try {
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
+      const day = d.getDate();
+      const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+      const month = thaiMonths[d.getMonth()];
+      const year = (d.getFullYear() + 543).toString().substring(2);
+      return `${day} ${month} ${year}`;
+    } catch (e) {
+      return isoStr;
+    }
+  }
+
+  function initCalendar() {
+    const calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth',
+      locale: 'th',
+      headerToolbar: {
+        left: 'prev,next',
+        center: 'title',
+        right: 'today'
+      },
+      events: []
+    });
+    calendar.render();
+  }
+
+  function parseMultipleThaiDates(valStr) {
+    if (!valStr) return [];
+    const dates = [];
+    const val = String(valStr).trim();
+
+    const regex = /(\d{1,2})\s*(มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม|ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.)\s*(\d{2,4})/g;
+
+    const thaiMonths = {
+      "มกราคม":"01","ม.ค.":"01","กุมภาพันธ์":"02","ก.พ.":"02","มีนาคม":"03","มี.ค.":"03",
+      "เมษายน":"04","เม.ย.":"04","พฤษภาคม":"05","พ.ค.":"05","มิถุนายน":"06","มิ.ย.":"06",
+      "กรกฎาคม":"07","ก.ค.":"07","สิงหาคม":"08","ส.ค.":"08","กันยายน":"09","ก.ย.":"09",
+      "ตุลาคม":"10","ต.ค.":"10","พฤศจิกายน":"11","พ.ย.":"11","ธันวาคม":"12","ธ.ค.":"12"
+    };
+
+    let match;
+    while ((match = regex.exec(val)) !== null) {
+      let day = match[1].padStart(2, '0');
+      let mStr = match[2];
+      let month = thaiMonths[mStr] || "01";
+      let year = parseInt(match[3]);
+      if (year < 100) year += 2500;
+      year = year - 543;
+      dates.push(`${year}-${month}-${day}`);
+    }
+
+    if (dates.length === 0 && val.includes("T")) {
+      dates.push(val.split("T")[0]);
+    }
+
+    return dates;
+  }
+
+  function updateCalendarEvents(data) {
+    const events = [];
+    data.forEach(item => {
+      const titleName = getValueByHeader(item, "รายการ") || "ประชุมคณะทำงาน";
+      
+      Object.keys(item).forEach(key => {
+        if (key !== "_rowIndex") {
+          const val = item[key];
+          const parsedDates = parseMultipleThaiDates(val);
+          parsedDates.forEach(dStr => {
+            events.push({
+              title: `${titleName} (${key})`,
+              start: dStr,
+              color: key.includes("ครั้งที่") ? '#2563eb' : '#059669'
+            });
+          });
+        }
+      });
+    });
+
+    document.getElementById("eventCountBadge").innerText = `${events.length} นัดหมาย`;
+
+    if (calendar) {
+      calendar.removeAllEvents();
+      calendar.addEventSource(events);
+      calendar.render();
+      if (events.length > 0) {
+        calendar.gotoDate(events[0].start);
+      }
+    }
+  }
+
+  function openAddModal() {
+    editingRowIndex = null;
+    document.getElementById("modalTitle").innerText = `เพิ่มข้อมูล (${currentSheet})`;
+    const fields = sheetConfigs[currentSheet];
+    
+    document.getElementById("dataForm").innerHTML = fields.map(f => `
+      <div class="mb-3">
+        <label class="form-label font-weight-bold small text-muted">${f}</label>
+        <input type="text" class="form-control form-control-lg fs-6" name="${f}" placeholder="กรอก ${f}">
+      </div>
+    `).join('');
+    
+    modalInstance.show();
+  }
+
+  function openEditModal(dataIdx) {
+    const rowObj = currentFetchedData[dataIdx];
+    editingRowIndex = rowObj._rowIndex;
+    document.getElementById("modalTitle").innerText = `แก้ไขข้อมูล (${currentSheet})`;
+    const fields = sheetConfigs[currentSheet];
+
+    document.getElementById("dataForm").innerHTML = fields.map(f => {
+      let val = getValueByHeader(rowObj, f);
+      if (f === "ลำดับที่" && (!val || val === "")) val = dataIdx + 1;
+      return `
+        <div class="mb-3">
+          <label class="form-label font-weight-bold small text-muted">${f}</label>
+          <input type="text" class="form-control form-control-lg fs-6" name="${f}" value="${val}">
+        </div>
+      `;
+    }).join('');
+
+    modalInstance.show();
+  }
+
+  function saveData() {
+    const formData = new FormData(document.getElementById("dataForm"));
+    const fields = sheetConfigs[currentSheet];
+    const rowData = fields.map(f => formData.get(f) || "");
+
+    const btnSave = document.getElementById("btnSave");
+    btnSave.disabled = true;
+    btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> กำลังบันทึก...`;
+
+    const payload = {
+      sheet: currentSheet,
+      action: editingRowIndex ? "edit" : "add",
+      rowIndex: editingRowIndex,
+      data: rowData
+    };
+
+    fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+      alert(editingRowIndex ? "แก้ไขข้อมูลสำเร็จ!" : "เพิ่มข้อมูลสำเร็จ!");
+      modalInstance.hide();
+      fetchData();
+    })
+    .catch(err => alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล"))
+    .finally(() => {
+      btnSave.disabled = false;
+      btnSave.innerText = "บันทึกข้อมูล";
+    });
+  }
+</script>
+</body>
+</html>
+'''
+
+with open('index_mobile.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print("index_mobile.html generated successfully")
